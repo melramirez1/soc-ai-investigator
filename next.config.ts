@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  /** Bundle minimo autocontenido para la imagen Docker (`.next/standalone`). */
+  output: "standalone",
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {

@@ -1,0 +1,30 @@
+# Dependencias y artefactos de build (se regeneran dentro de la imagen)
+node_modules
+.next
+out
+build
+coverage
+*.tsbuildinfo
+
+# Secretos: NUNCA dentro de la imagen; se inyectan en runtime
+.env*
+*.pem
+
+# Control de versiones, editores y documentación local
+.git
+.gitignore
+.vscode
+.idea
+.claude
+*.md
+_
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.DS_Store

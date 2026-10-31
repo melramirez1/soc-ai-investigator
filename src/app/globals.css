@@ -1,26 +1,188 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* =========================================================================
+   SKILL 2 — Elite Cyber-SOC design system (Falcon / Darktrace / Linear)
+   Tokens unicos de verdad. Los componentes nunca cablean hex sueltos.
+   ========================================================================= */
+
+@theme {
+  /* Superficies */
+  --color-canvas: #080b10;
+  --color-panel: #0e131f;
+  --color-panel-2: #131a29;
+  --color-hairline: rgba(255, 255, 255, 0.08);
+
+  /* Paleta de estado (severidad). Nunca se usa para series categoricas. */
+  --color-crit: #ff0055;
+  --color-high: #ff9100;
+  --color-med: #00e5ff;
+  --color-low: #00ffa3;
+
+  /* Telemetria apagada: cromo, bordes y rejillas. */
+  --color-steel: #64748b;
+  /* Texto secundario legible (4.5:1 sobre panel); #64748B no llega. */
+  --color-dim: #94a3b8;
+  --color-ink: #e2e8f0;
+
+  /* Rampa secuencial de un solo tono para magnitud. */
+  --color-seq-1: #7be4f7;
+  --color-seq-2: #2ecbe8;
+  --color-seq-3: #0fa3c4;
+  --color-seq-4: #0d7f99;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), "JetBrains Mono", Consolas, monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  /* Rejilla tenue de fondo: textura de consola sin ruido visual. */
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0, 229, 255, 0.07), transparent),
+    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 100% 100%, 48px 48px, 48px 48px;
+  background-attachment: fixed;
+}
+
+/* --- Paneles con glassmorphism ------------------------------------------ */
+
+@utility glass {
+  backdrop-filter: blur(12px);
+  background: rgba(14, 19, 31, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+@utility glass-hover {
+  transition: all 0.25s ease;
+
+  &:hover {
+    border-color: rgba(0, 229, 255, 0.4);
+    transform: translateY(-2px);
+  }
+}
+
+/* --- Resplandores de severidad ------------------------------------------ */
+
+@utility glow-crit {
+  box-shadow: 0 0 16px rgba(255, 0, 85, 0.3);
+}
+@utility glow-high {
+  box-shadow: 0 0 16px rgba(255, 145, 0, 0.25);
+}
+@utility glow-med {
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.25);
+}
+@utility glow-low {
+  box-shadow: 0 0 16px rgba(0, 255, 163, 0.25);
+}
+
+/* --- Baliza "live" del encabezado --------------------------------------- */
+
+@keyframes beacon-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 0, 85, 0.7);
+    opacity: 1;
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(255, 0, 85, 0);
+    opacity: 0.85;
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 0, 85, 0);
+    opacity: 1;
+  }
+}
+
+@utility beacon {
+  animation: beacon-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+@utility scan-sweep {
+  animation: sweep 1.6s ease-in-out infinite;
+}
+
+@keyframes fade-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@utility rise {
+  animation: fade-rise 0.35s ease both;
+}
+
+/* --- Accesibilidad ------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-med);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* --- Scrollbars acordes al tema ----------------------------------------- */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #1e293b transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 6px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #2c3b52;
+  background-clip: content-box;
+}
+
+/* Recharts: sin bordes blancos por defecto en los contenedores. */
+.recharts-surface {
+  overflow: visible;
+}
+.recharts-cartesian-axis-tick text {
+  fill: var(--color-steel);
 }
