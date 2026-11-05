@@ -13,10 +13,12 @@ import {
   Sparkles,
   Upload,
 } from "lucide-react";
+import { motion } from "framer-motion";
 import type { ReactNode } from "react";
 
 import { cn, formatTimestamp, SEVERITY_LABEL_ES } from "@/lib/utils";
 import type { AnalysisResult } from "@/lib/types";
+import { SPRING_SNAPPY, SPRING_TAB, TAP_SCALE } from "@/components/ui/motion";
 import { Button, Mono, SEVERITY_TEXT } from "@/components/ui/primitives";
 
 export type ViewKey = "ingest" | "dashboard" | "findings" | "risk" | "evidence" | "report";
@@ -123,30 +125,46 @@ export function SideNav({
         const Icon = view.icon;
         const disabled = !enabled && view.key !== "ingest";
         const count = counters[view.key];
+        const isActive = active === view.key;
         return (
-          <button
+          <motion.button
             key={view.key}
             type="button"
             disabled={disabled}
             onClick={() => onSelect(view.key)}
-            aria-current={active === view.key ? "page" : undefined}
+            aria-current={isActive ? "page" : undefined}
             title={view.hint}
+            whileTap={disabled ? undefined : { scale: TAP_SCALE }}
+            transition={SPRING_SNAPPY}
             className={cn(
-              "group flex shrink-0 items-center gap-2.5 rounded-lg border px-3 py-2 text-left text-xs font-semibold transition-all duration-200",
-              active === view.key
-                ? "border-med/40 bg-med/10 text-med"
-                : "border-transparent text-dim hover:border-hairline hover:bg-white/[0.03] hover:text-ink",
-              disabled && "cursor-not-allowed opacity-35 hover:border-transparent hover:bg-transparent",
+              "group relative flex shrink-0 items-center gap-2.5 rounded-lg px-3 py-2 text-left text-xs font-semibold",
+              "transition-colors duration-200",
+              isActive ? "text-med" : "text-dim hover:bg-white/[0.03] hover:text-ink",
+              disabled && "cursor-not-allowed opacity-35 hover:bg-transparent hover:text-dim",
             )}
           >
-            <Icon size={15} strokeWidth={2} className="shrink-0" />
-            <span className="whitespace-nowrap">{view.label}</span>
+            {/* Pastilla compartida: se desliza entre opciones via layoutId. */}
+            {isActive ? (
+              <motion.span
+                layoutId="activeTabIndicator"
+                transition={SPRING_TAB}
+                aria-hidden
+                className="absolute inset-0 rounded-lg border border-med/35 bg-med/10 shadow-[0_0_18px_-6px_rgba(0,229,255,0.35),inset_0_1px_0_0_rgba(255,255,255,0.05)]"
+              />
+            ) : null}
+            <Icon size={15} strokeWidth={2} className="relative shrink-0" />
+            <span className="relative whitespace-nowrap">{view.label}</span>
             {count !== undefined && count > 0 ? (
-              <span className="ml-auto hidden rounded bg-white/[0.07] px-1.5 py-0.5 font-mono text-[10px] text-dim md:inline">
+              <span
+                className={cn(
+                  "relative ml-auto hidden rounded px-1.5 py-0.5 font-mono text-[10px] tabular-nums transition-colors duration-200 md:inline",
+                  isActive ? "bg-med/15 text-med" : "bg-white/[0.07] text-dim",
+                )}
+              >
                 {count}
               </span>
             ) : null}
-          </button>
+          </motion.button>
         );
       })}
     </nav>

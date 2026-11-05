@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * Primitivas de UI del design system (SKILL 2).
  *
@@ -8,8 +10,10 @@
  *    textual, para que la identidad no dependa de la vision del color.
  */
 
+import { motion } from "framer-motion";
 import type { ReactNode } from "react";
 
+import { SPRING_SNAPPY, staggerContainer, staggerItem, TAP_SCALE } from "@/components/ui/motion";
 import { cn, SEVERITY_LABEL_ES } from "@/lib/utils";
 import type { Severity } from "@/lib/types";
 
@@ -65,16 +69,55 @@ export function Panel({
   className?: string;
   interactive?: boolean;
 }) {
+  // El desplazamiento en hover lo resuelve un resorte (framer-motion); el CSS
+  // de `glass-hover` solo anima borde y resplandor para no competir por transform.
   return (
-    <div
-      className={cn(
-        "glass rounded-xl",
-        interactive && "glass-hover",
-        className,
-      )}
+    <motion.div
+      className={cn("glass rounded-xl", interactive && "glass-hover", className)}
+      whileHover={interactive ? { y: -2 } : undefined}
+      transition={SPRING_SNAPPY}
     >
       {children}
-    </div>
+    </motion.div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Entrada escalonada
+// ---------------------------------------------------------------------------
+
+/**
+ * Contenedor que orquesta la entrada escalonada de sus `StaggerItem`.
+ * Con `nested` no dispara su propia animacion: hereda el estado de un `Stagger`
+ * padre y escalona sus hijos cuando el padre le da el turno.
+ */
+export function Stagger({
+  children,
+  className,
+  nested = false,
+}: {
+  children: ReactNode;
+  className?: string;
+  nested?: boolean;
+}) {
+  return (
+    <motion.div
+      className={className}
+      variants={staggerContainer}
+      initial={nested ? undefined : "hidden"}
+      animate={nested ? undefined : "show"}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+/** Hijo de `Stagger`: hereda la orquestacion del contenedor por contexto. */
+export function StaggerItem({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <motion.div className={className} variants={staggerItem}>
+      {children}
+    </motion.div>
   );
 }
 
@@ -186,16 +229,18 @@ export function StatTile({
   hint,
   tone = "neutral",
   icon,
+  className,
 }: {
   label: string;
   value: string | number;
   hint?: string;
   tone?: Severity | "neutral";
   icon?: ReactNode;
+  className?: string;
 }) {
   const accent = tone === "neutral" ? "text-ink" : SEVERITY_TEXT[tone];
   return (
-    <Panel interactive className="p-4">
+    <Panel interactive className={cn("p-4", className)}>
       <div className="flex items-start justify-between gap-2">
         <p className="text-[11px] font-medium uppercase tracking-wider text-steel">{label}</p>
         {icon ? <span className={cn("shrink-0", tone === "neutral" ? "text-steel" : accent)}>{icon}</span> : null}
@@ -260,13 +305,17 @@ export function Button({
   title?: string;
 }) {
   return (
-    <button
+    <motion.button
       type={type}
       onClick={onClick}
       disabled={disabled}
       title={title}
+      whileTap={disabled ? undefined : { scale: TAP_SCALE }}
+      transition={SPRING_SNAPPY}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-lg border px-3.5 py-2 text-xs font-semibold transition-all duration-200",
+        // transform queda fuera de la transicion CSS: lo gobierna el resorte.
+        "inline-flex items-center justify-center gap-2 rounded-lg border px-3.5 py-2 text-xs font-semibold",
+        "transition-[color,background-color,border-color,box-shadow] duration-200",
         "disabled:cursor-not-allowed disabled:opacity-45",
         variant === "primary" &&
           "border-med/50 bg-med/15 text-med hover:bg-med/25 hover:shadow-[0_0_18px_rgba(0,229,255,0.22)]",
@@ -277,7 +326,7 @@ export function Button({
       )}
     >
       {children}
-    </button>
+    </motion.button>
   );
 }
 

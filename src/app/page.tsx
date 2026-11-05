@@ -30,6 +30,8 @@ import {
   Upload,
 } from "lucide-react";
 
+import { MotionConfig } from "framer-motion";
+
 import { AppHeader, SideNav, StatusBar, ViewHeader, type ViewKey } from "@/components/AppShell";
 import { CategoryBreakdown, EntityRanking, EventTimeline, SeverityDonut } from "@/components/charts";
 import {
@@ -43,6 +45,8 @@ import {
   RiskMeter,
   SectionTitle,
   SeverityBadge,
+  Stagger,
+  StaggerItem,
   StatTile,
 } from "@/components/ui/primitives";
 import { buildDigest } from "@/lib/ai-contract";
@@ -182,6 +186,8 @@ export default function Home() {
     : {};
 
   return (
+    // reducedMotion="user": respeta prefers-reduced-motion en todas las animaciones JS.
+    <MotionConfig reducedMotion="user">
     <div className="flex min-h-screen flex-col">
       <AppHeader
         result={result}
@@ -222,6 +228,7 @@ export default function Home() {
 
       <StatusBar result={result} />
     </div>
+    </MotionConfig>
   );
 }
 
@@ -388,62 +395,89 @@ function DashboardView({ result }: { result: AnalysisResult }) {
   }, [findings, stats.byCategory]);
 
   return (
-    <div className="rise space-y-6">
-      <ViewHeader
-        step="02 · Dashboard"
-        title="Panorama del incidente"
-        description="Volumen analizado, distribucion por criticidad, cronologia de la actividad y entidades con mayor exposicion."
-      />
+    <Stagger className="space-y-6">
+      <StaggerItem>
+        <ViewHeader
+          step="02 · Dashboard"
+          title="Panorama del incidente"
+          description="Volumen analizado, distribucion por criticidad, cronologia de la actividad y entidades con mayor exposicion."
+        />
+      </StaggerItem>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <StatTile
-          label="Eventos analizados"
-          value={stats.totalEvents.toLocaleString("es-ES")}
-          hint={`${stats.flaggedEvents.toLocaleString("es-ES")} marcados como relevantes`}
-          icon={<Database size={16} />}
-        />
-        <StatTile
-          label="Criticos"
-          value={stats.bySeverity.CRITICAL}
-          hint="Requieren contencion inmediata"
-          tone="CRITICAL"
-          icon={<Siren size={16} />}
-        />
-        <StatTile label="Altos" value={stats.bySeverity.HIGH} hint="Investigacion priorizada" tone="HIGH" icon={<AlertTriangle size={16} />} />
-        <StatTile
-          label="Incidentes"
-          value={stats.totalIncidents}
-          hint={`${stats.totalFindings} hallazgos correlacionados`}
-          tone="MEDIUM"
-          icon={<Crosshair size={16} />}
-        />
-        <Panel interactive className={cn("p-4", stats.globalSeverity === "CRITICAL" && "glow-crit")}>
-          <p className="mb-3 text-[11px] font-medium uppercase tracking-wider text-steel">Riesgo global</p>
-          <RiskMeter score={stats.globalRiskScore} severity={stats.globalSeverity} />
-        </Panel>
-      </div>
+      <Stagger nested className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <StaggerItem>
+          <StatTile
+            className="h-full"
+            label="Eventos analizados"
+            value={stats.totalEvents.toLocaleString("es-ES")}
+            hint={`${stats.flaggedEvents.toLocaleString("es-ES")} marcados como relevantes`}
+            icon={<Database size={16} />}
+          />
+        </StaggerItem>
+        <StaggerItem>
+          <StatTile
+            className="h-full"
+            label="Criticos"
+            value={stats.bySeverity.CRITICAL}
+            hint="Requieren contencion inmediata"
+            tone="CRITICAL"
+            icon={<Siren size={16} />}
+          />
+        </StaggerItem>
+        <StaggerItem>
+          <StatTile className="h-full" label="Altos" value={stats.bySeverity.HIGH} hint="Investigacion priorizada" tone="HIGH" icon={<AlertTriangle size={16} />} />
+        </StaggerItem>
+        <StaggerItem>
+          <StatTile
+            className="h-full"
+            label="Incidentes"
+            value={stats.totalIncidents}
+            hint={`${stats.totalFindings} hallazgos correlacionados`}
+            tone="MEDIUM"
+            icon={<Crosshair size={16} />}
+          />
+        </StaggerItem>
+        <StaggerItem>
+          <Panel interactive className={cn("h-full p-4", stats.globalSeverity === "CRITICAL" && "glow-crit")}>
+            <p className="mb-3 text-[11px] font-medium uppercase tracking-wider text-steel">Riesgo global</p>
+            <RiskMeter score={stats.globalRiskScore} severity={stats.globalSeverity} />
+          </Panel>
+        </StaggerItem>
+      </Stagger>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <SeverityDonut bySeverity={stats.bySeverity} />
-        <div className="lg:col-span-2">
+      <Stagger nested className="grid gap-6 lg:grid-cols-3">
+        <StaggerItem>
+          <SeverityDonut bySeverity={stats.bySeverity} />
+        </StaggerItem>
+        <StaggerItem className="lg:col-span-2">
           <EventTimeline buckets={stats.timeline} />
-        </div>
-      </div>
+        </StaggerItem>
+      </Stagger>
 
-      <CategoryBreakdown data={categoryData} />
+      <StaggerItem>
+        <CategoryBreakdown data={categoryData} />
+      </StaggerItem>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <EntityRanking title="Equipos con mas actividad" subtitle="Hosts por volumen de eventos" buckets={stats.topHosts} />
-        <EntityRanking
-          title="IPs de origen"
-          subtitle="Direcciones con mayor numero de conexiones"
-          buckets={stats.topSourceIps}
-          unitLabel="conexiones"
-        />
-        <EntityRanking title="Cuentas de usuario" subtitle="Cuentas con mas eventos asociados" buckets={stats.topUsers} />
-        <EntityRanking title="Event IDs" subtitle="Identificadores de evento mas frecuentes" buckets={stats.topEventIds} />
-      </div>
-    </div>
+      <Stagger nested className="grid gap-6 lg:grid-cols-2">
+        <StaggerItem>
+          <EntityRanking title="Equipos con mas actividad" subtitle="Hosts por volumen de eventos" buckets={stats.topHosts} />
+        </StaggerItem>
+        <StaggerItem>
+          <EntityRanking
+            title="IPs de origen"
+            subtitle="Direcciones con mayor numero de conexiones"
+            buckets={stats.topSourceIps}
+            unitLabel="conexiones"
+          />
+        </StaggerItem>
+        <StaggerItem>
+          <EntityRanking title="Cuentas de usuario" subtitle="Cuentas con mas eventos asociados" buckets={stats.topUsers} />
+        </StaggerItem>
+        <StaggerItem>
+          <EntityRanking title="Event IDs" subtitle="Identificadores de evento mas frecuentes" buckets={stats.topEventIds} />
+        </StaggerItem>
+      </Stagger>
+    </Stagger>
   );
 }
 

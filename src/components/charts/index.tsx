@@ -121,7 +121,7 @@ function ChartFrame({
   const tableId = useId();
 
   return (
-    <Panel interactive className="overflow-hidden">
+    <Panel interactive className="h-full overflow-hidden">
       <PanelHeader
         title={title}
         subtitle={subtitle}
